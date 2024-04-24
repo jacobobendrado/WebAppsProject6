@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import './Plan.css'
+import {Helmet} from "react-helmet";
 function Plan() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+        <Helmet>
+           <link href="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/src/Plan.css" rel="stylesheet" type="text/css" />
+        </Helmet>
         <div class="header">
             <div class="name-version">
                 <h1 id="name">Academic Planning Enviroment <span id="version">Version 1</span></h1>
