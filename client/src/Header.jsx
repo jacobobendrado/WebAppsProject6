@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './index.css'
 
 function Header() {
   const [count, setCount] = useState(0)
@@ -19,7 +18,7 @@ function Header() {
             <div class="buttons">
                 <button class="tr" id="manage">Plan Manager</button>
                 <button class="tr" id="save">Save</button>
-                <a href="php/logout.php">
+                <a href="#">
                     <button class="tr" id="logout">Log out</button>
                 </a>
             </div>

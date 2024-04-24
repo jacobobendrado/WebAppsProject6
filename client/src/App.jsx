@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import './App.css'
 import Header from './Header.jsx'
-import UpperLeft from './UpperLeft.jsx'
-import UpperRight from './UpperRight.jsx'
-import LowerLeft from './LowerLeft.jsx'
-import LowerRight from './LowerRight.jsx'
+import RightMain from './RightMain.jsx'
+import LeftMain from './LeftMain.jsx'
+
 
 function App() {
   const [count, setCount] = useState(0)
@@ -12,10 +11,8 @@ function App() {
   return (
     <>
       <Header />
-      <UpperLeft />
-      <UpperRight />
-      <LowerLeft />
-      <LowerRight />
+      <LeftMain /> 
+      <RightMain />
     </>
   )
 }
