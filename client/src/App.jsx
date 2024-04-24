@@ -1,19 +1,26 @@
 import { useState } from 'react'
-import './App.css'
-import Header from './Header.jsx'
-import RightMain from './RightMain.jsx'
-import LeftMain from './LeftMain.jsx'
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route, createBrowserRouter, RouterProvider } from "react-router-dom";
 
+import Plan from './Plan.jsx'
+import Login from './Login.jsx'
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Plan />
+  },
+  {
+    path: "/login",
+    element: <Login />
+  }
+])
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <>
-      <Header />
-      <LeftMain /> 
-      <RightMain />
-    </>
+    <RouterProvider router = {router}/>
   )
 }
 
