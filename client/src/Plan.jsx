@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import {Helmet} from "react-helmet";
+import React, { useEffect } from 'react';
 function Plan() {
   const [count, setCount] = useState(0)
 
+  useEffect(() => {
+    const scriptTag = document.createElement('script');
+    scriptTag.src = "/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/public/termProject.js";
+    scriptTag.type = "text/javascript";
+    document.body.appendChild(scriptTag);
+  });
   return (
     <>
         <Helmet>
