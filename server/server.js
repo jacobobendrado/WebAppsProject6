@@ -125,12 +125,12 @@ app.get('/catalog', (req, res) => {
 
 app.get('/user', (req, res) => {
     //TODO: verify session
-    const user = req.session.username;
+    const user = "asteele";
   
-    connection.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
+    db.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
       if (error) {
         console.error('Error fetching user data:', error);
-        return res.status(500).send('Internal Server Error');
+        return res.status(500).send('Internal Server Error 1');
       }
   
       if (results.length === 0) {
@@ -139,10 +139,10 @@ app.get('/user', (req, res) => {
   
       const userData = results[0];
   
-      connection.query('SELECT course_id, grade FROM JAC_taken_courses WHERE username = ?', [user], (error, courses) => {
+      db.query('SELECT course_id, grade FROM JAC_taken_courses WHERE username = ?', [user], (error, courses) => {
         if (error) {
           console.error('Error fetching courses:', error);
-          return res.status(500).send('Internal Server Error');
+          return res.status(500).send('Internal Server Error 2');
         }
   
         let gradePoints = 0.0;
@@ -151,23 +151,29 @@ app.get('/user', (req, res) => {
         const courseIds = courses.map(course => course.course_id);
         const query = 'SELECT credits FROM JAC_course WHERE course_id IN (?)';
         
-        connection.query(query, [courseIds], (error, creditRows) => {
+        db.query(query, [courseIds], (error, creditRows) => {
           if (error) {
             console.error('Error fetching credits:', error);
-            return res.status(500).send('Internal Server Error');
+            return res.status(500).send('Internal Server Error 3');
           }
-  
+        
           const creditMap = {};
           creditRows.forEach(row => {
             creditMap[row.course_id] = row.credits;
           });
-  
+        
+          console.log("Credit Map:", creditMap); 
+        
           courses.forEach(course => {
             const credits = creditMap[course.course_id];
             if (!credits) {
               console.error('Credits not found for course:', course.course_id);
-              return res.status(500).send('Internal Server Error');
+              console.log("Course:", course);
+              return res.status(500).send('Internal Server Error 4');
             }
+        
+            console.log("Course:", course.course_id, "Credits:", credits);
+        
   
             totalCredits += credits;
   
@@ -209,7 +215,7 @@ app.get('/user', (req, res) => {
                 break;
               default:
                 console.error('Invalid grade:', course.grade);
-                return res.status(500).send('Internal Server Error');
+                return res.status(500).send('Internal Server Error 5');
             }
           });
   
@@ -228,10 +234,10 @@ app.get('/user', (req, res) => {
 
 app.get('/plan', (req, res) => {
     //TODO: verify session
-    const user = req.session.username;
-    const plan = req.query.plan;
+    const user = "asteele";
+    const plan = "test";
   
-    connection.query('SELECT catalog_year FROM JAC_plan WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
+    db.query('SELECT catalog_year FROM JAC_plan WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
       if (error) {
         console.error('Error fetching catalog year:', error);
         return res.status(500).send('Internal Server Error');
@@ -243,7 +249,7 @@ app.get('/plan', (req, res) => {
   
       const catalogYear = results[0].catalog_year;
   
-      connection.query('SELECT major_name FROM JAC_plan_major WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
+      db.query('SELECT major_name FROM JAC_plan_major WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
         if (error) {
           console.error('Error fetching majors:', error);
           return res.status(500).send('Internal Server Error');
@@ -251,7 +257,7 @@ app.get('/plan', (req, res) => {
   
         const majors = results.map(row => row.major_name);
   
-        connection.query('SELECT minor_name FROM JAC_plan_minor WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
+        db.query('SELECT minor_name FROM JAC_plan_minor WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
           if (error) {
             console.error('Error fetching minors:', error);
             return res.status(500).send('Internal Server Error');
@@ -261,7 +267,7 @@ app.get('/plan', (req, res) => {
   
           let classes = [];
   
-          connection.query('SELECT course_id, taken_year, term FROM JAC_taken_courses WHERE username = ?', [user], (error, results) => {
+          db.query('SELECT course_id, taken_year, term FROM JAC_taken_courses WHERE username = ?', [user], (error, results) => {
             if (error) {
               console.error('Error fetching taken courses:', error);
               return res.status(500).send('Internal Server Error');
@@ -273,7 +279,7 @@ app.get('/plan', (req, res) => {
               term: row.term
             }));
   
-            connection.query('SELECT course_id, plan_year, term FROM JAC_planned_courses WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
+            db.query('SELECT course_id, plan_year, term FROM JAC_planned_courses WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
               if (error) {
                 console.error('Error fetching planned courses:', error);
                 return res.status(500).send('Internal Server Error');
@@ -285,7 +291,7 @@ app.get('/plan', (req, res) => {
                 term: row.term
               })));
   
-              connection.query('SELECT MAX(taken_year) AS max_year, term FROM JAC_taken_courses GROUP BY term ORDER BY term DESC LIMIT 1', (error, results) => {
+              db.query('SELECT MAX(taken_year) AS max_year, term FROM JAC_taken_courses GROUP BY term ORDER BY term DESC LIMIT 1', (error, results) => {
                 if (error) {
                   console.error('Error fetching current year and term:', error);
                   return res.status(500).send('Internal Server Error');
