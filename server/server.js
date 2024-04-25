@@ -322,19 +322,57 @@ app.get('/majorrequirements', (req, res) => {
   if (!major) {
       return res.status(400).json({ error: "Major is not set" });
   }
-  
-  db.query('SELECT required_id, type, subgroup, credits_needed FROM JAC_major_req_group WHERE major_name = ?;', [major], (error, requiredRows) => {
+      
+  db.query("SELECT required_id, type, subgroup, credits_needed FROM JAC_major_req_group WHERE major_name = ?;", [major], (error, requiredRows) => {
     if (error) {
       return res.status(500).send('Internal Server Error');
     }
     console.log(requiredRows);
+    requirementCourses = [];
+
+    const  required_ids= requiredRows.map(row => row.required_id);
+    const query = 'SELECT course_id FROM JAC_major_requirement WHERE required_id IN (?)';
+    db.query(query, [required_ids], (error, required_courses) => { 
+      
+      console.log(required_courses);
+    });
   });
-  //SELECT course_id FROM JAC_major_requirement WHERE required_id = ?;
 });
+app.get('/minorrequirements', (req, res) => {
+  const minor = req.query.minor;
 
+  if (!minor) {
+      return res.status(400).json({ error: "Minor is not set" });
+  }
+  let requirementGroups = {};
+  
+  db.query('SELECT required_id, subgroup, credits_needed FROM JAC_minor_req_group WHERE minor_name = ?;', [minor], (error, requiredRows) => {
+    if (error) {
+      return res.status(500).send('Internal Server Error');
+    }
+    let requirementCourses = [];
+    requiredRows.forEach(row => {
 
+      db.query('SELECT course=id FROM JAC_minor_requirement WHERE required_id = ?;', [row.required_id], (error, courses) => {
+        if (error) {
+          return res.status(500).send('Internal Server Error');
+        }
+        courses.forEach(course => {
+            requirementCourses.push(course.course_id);
+        });
+      });
+  
+      requirementGroups[row.subgroup ?? "null"] = { 
+        courses: requirementCourses, 
+        credits_needed: row.credits_needed 
+      };
+    });
 
+    });
+    console.log(requirementGroups);
+    res.json(requirementGroups);
 
+});
 
 
 
