@@ -140,13 +140,13 @@ if (urlParameters.get('username')) {
 if (urlParameters.get('planname')) {
     planInfo.planId = urlParameters.get('planname');
 } let loadData = function() {
-    $.ajax({ url: "/user", method: "GET", data: {username: "asteele"}, dataType: "json"}).done(function(userData) {
+    $.ajax({ url: "http://localhost:8081/user", method: "GET", dataType: "json"}).done(function(userData) {
         if (!planInfo.planId) {
             planInfo.planId = userData.default_plan;
         }
-        $.ajax({url: "/plan", method: "GET", data: "test", dataType: "json"}).done(function(planData) {
+        $.ajax({url: "http://localhost:8081/plan", method: "GET", dataType: "json"}).done(function(planData) {
             myPlan = new Plan(planData.plan_name, planData.catalog_year, planData.majors, planData.minors, userData.name, planData.currYear, planData.currTerm);
-            $.ajax({url: "/catalog", method: "GET", data: {yr: "2021"}, dataType: "json"}).done(function(catalogData) {
+            $.ajax({url: "http://localhost:8081/catalog", method: "GET", data: {year: "2021"}, dataType: "json"}).done(function(catalogData) {
                 for (let c_id in catalogData) {
                     let credits = parseFloat(catalogData[c_id].credits);
                     let name = catalogData[c_id].name;
@@ -168,7 +168,7 @@ if (urlParameters.get('planname')) {
                 let accord = document.getElementById("accordion");
                 let getMajor = function(majorName) {
                     let userInfo = {major: majorName};
-                    $.ajax({url: "", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/majorrequirements?major=Computer Science", method: "GET", dataType: "json"}).done(function(data) {
                         for (let category in data) {
                             if (majorName == "Undeclared") {
                                 accord.innerHTML += '<h3>' + category + '</h3>\
@@ -202,7 +202,7 @@ if (urlParameters.get('planname')) {
                 }
                 let getMinor = function(minorName) {
                     let userInfo = {minor: minorName};
-                    $.ajax({url: "/", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/minorrequirements?minor=Bible", method: "GET", dataType: "json"}).done(function(data) {
                         accord.innerHTML += '<h3>' + minorName + ' Minor</h3>\
                         <div id="accordion-' + minorName + '" class="accordion-tab"></div>';
                         let sectionHTML = document.getElementById("accordion-" + minorName);
@@ -241,9 +241,12 @@ if (urlParameters.get('planname')) {
         gpa = userData.gpa.toFixed(2);
     }).fail(function(error) {
         console.log("There was an error: " + error.responseText);
-    });
+    }, 50);
 }
-loadData();
+setTimeout(function() {
+    loadData();
+
+}, 50);
 
 let courseSearchText = document.getElementById("search-bar");
 

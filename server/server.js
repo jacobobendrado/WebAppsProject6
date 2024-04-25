@@ -2,38 +2,14 @@ const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const redis = require('redis');
-const client = redis.createClient();
-const redisStore = require("connect-redis").default;
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = 8081;
 
 app.use(express.json());
 app.use(cors());
-app.use(cookieParser());
-
-client.connect().then(() => {
-  console.log('Connected to Redis server!');
-}).catch((err) => {
-  console.error('Could not establish a connection with Redis.', err);
-});
-
-
-app.use(session({
-  store: new redisStore({ client: client }),
-  secret: 'topsecret~!@#$%^&*',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    sameSite: false,
-    secure: false,
-    httpOnly: false,
-    maxAge: 1000 * 60 * 10
-  }
-}))
 
 
 app.listen(port, () => {
@@ -64,15 +40,21 @@ app.post('/login', (req, res) => {
           
           const user = data[0];
           if (verifyPassword(password, user.password)) {
-              req.session.username = username;
-              req.session.save((err) => {
-                  if (err) {
-                      console.error("Error saving session:", err);
-                      return res.json("Login Failed");
-                  }
+              const tokenPayload = {
+                user: username,
+              };
+              const accessToken = jwt.sign(tokenPayload, 'SECRET');
 
-                  return res.json("Login Successful");
-              });
+              return (
+                res.json(accessToken)
+                //res.status(201).json({
+                //status: 'success',
+                //message: 'User Logged In!',
+                //data: {
+                //  accessToken,
+                //},
+              //})
+              );
           } else {
               return res.json("Login Failed: Invalid username or password");
           }
@@ -126,6 +108,11 @@ app.get('/catalog', (req, res) => {
 app.get('/user', (req, res) => {
   //TODO: verify session
   //TODO: get session user
+  //const token = req.headers('Authorization');
+  //console.log(req.headers["authorization"]);
+  //const decoded = jwt.verify(token, 'SECRET');
+  //const userh = decoded.user;
+  //console.log(userh);
   const user = "asteele";
 
   db.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
