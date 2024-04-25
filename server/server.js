@@ -322,57 +322,94 @@ app.get('/majorrequirements', (req, res) => {
   if (!major) {
       return res.status(400).json({ error: "Major is not set" });
   }
-      
-  db.query("SELECT required_id, type, subgroup, credits_needed FROM JAC_major_req_group WHERE major_name = ?;", [major], (error, requiredRows) => {
+
+  const sql1 = "SELECT required_id, type, subgroup, credits_needed FROM JAC_major_req_group WHERE major_name = ?;";
+  db.query(sql1, [major], (error, requirementGroupsSql) => {
     if (error) {
       return res.status(500).send('Internal Server Error');
     }
-    console.log(requiredRows);
-    requirementCourses = [];
 
-    const  required_ids= requiredRows.map(row => row.required_id);
-    const query = 'SELECT course_id FROM JAC_major_requirement WHERE required_id IN (?)';
-    db.query(query, [required_ids], (error, required_courses) => { 
-      
-      console.log(required_courses);
+    const requirementGroups = {};
+
+    const sql2 = "SELECT course_id FROM JAC_major_requirement WHERE required_id = ?;";
+    let processedCount = 0;
+
+    requirementGroupsSql.forEach(row => {
+      const required_id = row.required_id;
+      const type = row.type;
+      const subgroup = row.subgroup || "null";
+      const credits_needed = parseFloat(row.credits_needed).toFixed(1);
+
+      if (!requirementGroups[type]) {
+        requirementGroups[type] = {};
+      }
+
+      db.query(sql2, [required_id], (error, coursesForRequirementsSql) => {
+        if (error) {
+          return res.status(500).send('Internal Server Error');
+        }
+
+        const requirementCourses = coursesForRequirementsSql.map(course => course.course_id);
+
+        requirementGroups[type][subgroup] = {
+          courses: requirementCourses,
+          credits_needed: credits_needed
+        };
+
+        processedCount++;
+
+        if (processedCount === requirementGroupsSql.length) {
+          res.json(requirementGroups);
+        }
+      });
     });
   });
 });
+
 app.get('/minorrequirements', (req, res) => {
   const minor = req.query.minor;
 
   if (!minor) {
       return res.status(400).json({ error: "Minor is not set" });
   }
-  let requirementGroups = {};
-  
-  db.query('SELECT required_id, subgroup, credits_needed FROM JAC_minor_req_group WHERE minor_name = ?;', [minor], (error, requiredRows) => {
+
+  const sql1 = "SELECT required_id, subgroup, credits_needed FROM JAC_minor_req_group WHERE minor_name = ?;";
+  db.query(sql1, [minor], (error, requiredRows) => {
     if (error) {
       return res.status(500).send('Internal Server Error');
     }
-    let requirementCourses = [];
-    requiredRows.forEach(row => {
 
-      db.query('SELECT course=id FROM JAC_minor_requirement WHERE required_id = ?;', [row.required_id], (error, courses) => {
+    const requirementGroups = {};
+    let processedCount = 0;
+
+    requiredRows.forEach(row => {
+      const required_id = row.required_id;
+      const subgroup = row.subgroup || "null";
+      const credits_needed = parseFloat(row.credits_needed).toFixed(1);
+
+      const sql2 = "SELECT course_id FROM JAC_minor_requirement WHERE required_id = ?;";
+      db.query(sql2, [required_id], (error, courses) => {
         if (error) {
           return res.status(500).send('Internal Server Error');
         }
-        courses.forEach(course => {
-            requirementCourses.push(course.course_id);
-        });
+
+        const requirementCourses = courses.map(course => course.course_id);
+
+        requirementGroups[subgroup] = {
+          courses: requirementCourses,
+          credits_needed: credits_needed
+        };
+
+        processedCount++;
+
+        if (processedCount === requiredRows.length) {
+          res.json(requirementGroups);
+        }
       });
-  
-      requirementGroups[row.subgroup ?? "null"] = { 
-        courses: requirementCourses, 
-        credits_needed: row.credits_needed 
-      };
     });
-
-    });
-    console.log(requirementGroups);
-    res.json(requirementGroups);
-
+  });
 });
+
 
 
 
