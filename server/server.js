@@ -107,13 +107,9 @@ app.get('/catalog', (req, res) => {
 
 app.get('/user', (req, res) => {
   //TODO: verify session
-  //TODO: get session user
-  //const token = req.headers('Authorization');
-  //console.log(req.headers["authorization"]);
-  //const decoded = jwt.verify(token, 'SECRET');
-  //const userh = decoded.user;
-  //console.log(userh);
-  const user = "asteele";
+  const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const user = decoded.user;
 
   db.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
     if (error) {

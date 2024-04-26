@@ -1,20 +1,27 @@
 import { useState } from 'react'
 import {Helmet} from "react-helmet";
 import React, { useEffect } from 'react';
+import $ from 'jquery';
 function Plan() {
   const [count, setCount] = useState(0)
-
+/*
   useEffect(() => {
     const scriptTag = document.createElement('script');
     scriptTag.src = "/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/public/termProject.js";
     scriptTag.type = "text/javascript";
     document.body.appendChild(scriptTag);
-  });
+  });*/
   return (
     <>
         <Helmet>
            <link href="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/src/Plan.css" rel="stylesheet" type="text/css" />
+           <script src="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/public/termProject.js" defer></script>
+           <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
+           <script src="https://code.jquery.com/jquery-3.6.0.js" defer></script>
+           <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js" defer></script>
+           <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous" defer></script>
         </Helmet>
+
         <div class="header">
             <div class="name-version">
                 <h1 id="name">Academic Planning Enviroment <span id="version">Version 1</span></h1>

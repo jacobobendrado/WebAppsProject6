@@ -10,7 +10,10 @@ function Login() {
     function handleSubmit(event){
         event.preventDefault();
         axios.post('http://localhost:8081/login', {username, password})
-        .then(res => console.log(res))
+        .then(res => {
+            console.log(res)
+            localStorage.setItem("token", res.data);
+        })
         .catch(err=> console.log(err));
     }
     return (

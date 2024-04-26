@@ -133,14 +133,17 @@ let schedule;
 let courses = {};
 let gpa;
 let planInfo = {planId: null, username: null};
+
 const urlParameters = new URLSearchParams(window.location.search);
 if (urlParameters.get('username')) {
     planInfo.username = urlParameters.get('username');
 }
 if (urlParameters.get('planname')) {
     planInfo.planId = urlParameters.get('planname');
-} let loadData = function() {
-    $.ajax({ url: "http://localhost:8081/user", method: "GET", dataType: "json"}).done(function(userData) {
+} 
+let loadData = function() {
+    const token = localStorage.getItem("token");
+    $.ajax({ url: "http://localhost:8081/user", method: "GET", headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
         if (!planInfo.planId) {
             planInfo.planId = userData.default_plan;
         }
