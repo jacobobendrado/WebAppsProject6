@@ -19,11 +19,38 @@ function Plan() {
         <Helmet>
            <link href="src/Plan.css" rel="stylesheet" type="text/css" />
            <script src="public/termProject.js" defer></script>
+           <script src="plansModal.js" defer></script>
+            <script src="notesModal.js" defer></script>
            <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
            <script src="https://code.jquery.com/jquery-3.6.0.js" defer></script>
            <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js" defer></script>
            <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous" defer></script>
         </Helmet>
+
+        <div id="plans-modal" class="modal">
+        <div class="modal-content">
+        <span class="close" id='close-plans-modal'>&times;</span>
+            <h3 id="medium-header-1">Plan Manager</h3>
+                <form id="submit-form">
+                    <input type="radio" name="button-plan" value=""></input>
+                    <label></label><br></br>
+                    <button id="submit-plan" name="submit-plan"> View </button>
+                </form>  
+            </div>
+        </div>
+
+        <div id="notes-modal" class="modal">
+            <div class="modal-content">
+            <span class="close" id='close-notes-modal'>&times;</span>
+                <h3 id="medium-header-2">Notes Manager</h3>
+                    <textarea name="notes-entry" placeholder="Add a note..." rows="10" cols="60"></textarea>
+                    <form id="submit-form">
+                        <label></label><br></br>
+                        <button id="add-note" name="add-note"> Add Note </button>
+                    </form>  
+                    <p>My Notes</p>
+            </div>
+        </div>
 
         <div class="header">
             <div class="name-version">
@@ -36,9 +63,9 @@ function Plan() {
                 </div>
             </div>
             <div class="buttons">
-                <button class="tr" id="manage">Plan Manager</button>
+                <button class="tr" id="manage-plans">Plan Manager</button>
                 <button class="tr" id="save">Save</button>
-                <a href="#">
+                <a href="php/logout.php">
                     <button class="tr" id="logout">Log out</button>
                 </a>
             </div>
@@ -52,10 +79,13 @@ function Plan() {
             </div>
             <div id="lower-left" class="lower left">
                     <h3 id="medium-header-2">Home Pages</h3>
-                    <a href="http://judah.cedarville.edu/" class="home-pages" id="course-home">Course Page</a>
-                    <a href="http://judah.cedarville.edu/~bender/cs3220.html" class="home-pages">Jacob Bender</a>
-                    <a href="http://judah.cedarville.edu/~ceppich/cs3220.html" class="home-pages">Christian Eppich</a>
-                    <a href="http://judah.cedarville.edu/~asteele/cs3220.html" class="home-pages">Alex Steele</a>
+                    <div class="buttons horizontal-buttons">
+                        <button class="tr" id="add-year">Add Year</button>
+                        <br></br>
+                        <button class="tr" id="remove-year">Remove Year</button>
+                        <br></br>
+                        <button class="tr" id="manage-notes">Notes</button>
+                    </div>
             </div>
         </div>
         <div id="right-main" class="top">

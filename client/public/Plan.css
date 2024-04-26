@@ -107,10 +107,6 @@ body {
   }   
 }
 
-.horizontal-buttons {
-  flex-direction: column;
-}
-
 .header .buttons{ 
   display: flex;
   flex: 0 1 45%;

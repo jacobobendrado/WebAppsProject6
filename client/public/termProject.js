@@ -394,8 +394,22 @@ function removeClass(box) {
             const course_plan = document.querySelector("#planned-course-" + rmButton.id);
             let box = rmButton.parentElement.parentElement;
             course_plan.remove();
-            myPlan.removeCourse(rmButton.id);
-            schedule = new Years(myPlan);
+            let rmCourse = myPlan.removeCourse(rmButton.id);
+            schedule.years.forEach(function(currYear) {
+                if (currYear.fall.courses.indexOf(rmCourse) > -1) {
+                    currYear.fall.removeCourse(rmButton.id);
+                    console.log(rmCourse);
+                }
+                if (currYear.spring.courses.indexOf(rmCourse) > -1) {
+                    currYear.spring.removeCourse(rmButton.id);
+                    console.log(rmCourse);
+                }
+                if (currYear.summer.courses.indexOf(rmCourse) > -1) {
+                    currYear.summer.removeCourse(rmButton.id);
+                    console.log(rmCourse);
+                }
+                
+            })
             console.log(rmButton);
             
             console.log(box);
@@ -435,6 +449,7 @@ function setupDragAndDrop() {
                 let selected = '';
                 let fromTable = false;
 
+                console.log(selectedId);
                 selected = document.getElementById(selectedId);
 
                 let courseId = '';
@@ -500,9 +515,18 @@ function setupDragAndDrop() {
                     let [termUser, year] = termYearText.split(' ');
                     termUser = termUser.toLowerCase();
 
-                    myPlan.addCourse(new Course(termUser, year, credits, courseId, courseName));
+                    let myCourse = new Course(termUser, year, credits, courseId, courseName);
+                    myPlan.addCourse(myCourse);
 
-                    schedule = new Years(myPlan);
+
+                    let indexYear = year - schedule.firstYear;
+                    if (termUser != "fall") {
+                        indexYear--;
+                    }
+
+
+                    schedule.years[indexYear][termUser].addCourse(myCourse);
+                    
                     updateHours(box, 'in', credits);
                     box.appendChild(newElement);
                     
@@ -603,3 +627,24 @@ logoutButton.addEventListener("click", function(event) {
     localStorage.removeItem("token");
     window.location.reload(true);
 }, false);
+
+/*
+
+function(e) {
+    schedule.years.push(new Year());
+    render();
+}
+
+function(e) {
+    let lastYear = schedule.years[schedule.years.length - 1];
+    if (lastYear.fall.courses.length + lastYear.spring.courses.length + lastYear.summer.courses.length != 0) {
+        //error
+        return;
+    }
+    schedule.years.pop()?
+}
+
+//TODO: get accordian working
+//TODO: get green for taken courses to updata on render()
+
+*/
