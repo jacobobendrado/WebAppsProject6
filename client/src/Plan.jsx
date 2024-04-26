@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {Helmet} from "react-helmet";
 import React, { useEffect } from 'react';
-import $ from 'jquery';
 function Plan() {
   const [count, setCount] = useState(0)
 /*
@@ -11,11 +10,15 @@ function Plan() {
     scriptTag.type = "text/javascript";
     document.body.appendChild(scriptTag);
   });*/
+  console.log(localStorage.getItem('token'));
+  if(!localStorage.getItem('token')){
+    window.location.href = "http://localhost:5173/login";
+  }
   return (
     <>
         <Helmet>
-           <link href="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/src/Plan.css" rel="stylesheet" type="text/css" />
-           <script src="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/public/termProject.js" defer></script>
+           <link href="src/Plan.css" rel="stylesheet" type="text/css" />
+           <script src="public/termProject.js" defer></script>
            <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"/>
            <script src="https://code.jquery.com/jquery-3.6.0.js" defer></script>
            <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js" defer></script>

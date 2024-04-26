@@ -11,15 +11,15 @@ function Login() {
         event.preventDefault();
         axios.post('http://localhost:8081/login', {username, password})
         .then(res => {
-            console.log(res)
             localStorage.setItem("token", res.data);
+            window.location.href = "http://localhost:5173/";
         })
         .catch(err=> console.log(err));
     }
     return (
         <>
         <Helmet>
-            <link href="/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/src/Login.css" rel="stylesheet" type="text/css" />
+            <link href="src/Login.css" rel="stylesheet" type="text/css" />
         </Helmet>
         <div class="container">
             <div class="login-container-wrapper">

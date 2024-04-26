@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
 var bodyParser = require('body-parser');
+const jwtd = require('jwt-destroy');
 
 const app = express();
 const port = 8081;
@@ -50,16 +51,7 @@ app.post('/login', (req, res) => {
               };
               const accessToken = jwt.sign(tokenPayload, 'SECRET');
 
-              return (
-                res.json(accessToken)
-                //res.status(201).json({
-                //status: 'success',
-                //message: 'User Logged In!',
-                //data: {
-                //  accessToken,
-                //},
-              //})
-              );
+              return res.json(accessToken);
           } else {
               return res.json("Login Failed: Invalid username or password");
           }
@@ -217,12 +209,10 @@ app.get('/user', (req, res) => {
 
 app.get('/plan', (req, res) => {
   //TODO: verify session
-  //TODO: Get session user and default plan
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
   const user = decoded.user;
-  //const user = "asteele";
-  const plan = "test";
+  const plan = req.query.planId;
 
   db.query('SELECT catalog_year FROM JAC_plan WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
     if (error) {
@@ -278,7 +268,7 @@ app.get('/plan', (req, res) => {
               term: row.term
             })));
 
-            db.query('SELECT MAX(taken_year) AS max_year, term FROM JAC_taken_courses GROUP BY term ORDER BY term DESC LIMIT 1', (error, results) => {
+            db.query('SELECT MAX(taken_year) AS max_year, term FROM JAC_taken_courses WHERE username = ? and taken_year = (SELECT MAX(taken_year) from JAC_taken_courses) GROUP BY term ORDER BY term DESC LIMIT 1', [user], (error, results) => {
               if (error) {
                 console.error('Error fetching current year and term:', error);
                 return res.status(500).send('Internal Server Error');
@@ -399,11 +389,14 @@ app.get('/minorrequirements', (req, res) => {
 });
 
 app.post('/save-planned-courses', (req, res) => {
-  console.log(req.body);
-  const plannedCourses = req.body;
+    const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const user = decoded.user;
+  const plan = req.body.planid;
 
+  const plannedCourses = req.body.courses;
   const deleteQuery = `DELETE FROM JAC_planned_courses WHERE plan_name = ? AND username = ?`;
-  const deleteValues = ['test', 'asteele']; //TODO: change temp values
+  const deleteValues = [plan, user];
 
 
   db.query(deleteQuery, deleteValues, (error, results, fields) => {
@@ -415,7 +408,7 @@ app.post('/save-planned-courses', (req, res) => {
     for (let course_id in plannedCourses) {
       let course = plannedCourses[course_id];
       let query = `INSERT INTO JAC_planned_courses (plan_name, username, course_id, plan_year, term) VALUES (?, ?, ?, ?, ?)`;
-      let values = ['test', 'asteele', course_id, course.year, course.term]; //TODO: change temp values
+      let values = [plan, user, course_id, course.year, course.term];
 
       
       db.query(query, values, (error, results, fields) => {
@@ -429,3 +422,4 @@ app.post('/save-planned-courses', (req, res) => {
   });
   res.sendStatus(200);
 });
+

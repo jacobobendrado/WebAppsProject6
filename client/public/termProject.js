@@ -57,6 +57,7 @@ class Years {
         }
         else if (input instanceof Plan) {
             indexYear = input.catalogYear;
+            let maxYear = input.catalogYear;
             input.courses.forEach(function(course) {
                 let currYear = course.year;
                 if (course.term != "fall") {
@@ -65,14 +66,17 @@ class Years {
                 if (currYear < indexYear) {
                     indexYear = currYear;
                 }
+                if (maxYear < currYear) {
+                    maxYear = currYear;
+                }
             });
+            for (let i = 0; i <= maxYear - indexYear; i++) {
+                years[i] = new Year();
+            }
             input.courses.forEach(function(course, i) {
                 let index = course.year - indexYear;
                 if (course.term != "fall") {
                     index--;
-                }
-                if (!years[index]) {
-                    years[index] = new Year();
                 }
                 years[index][course.term].addCourse(course);
             });
@@ -148,9 +152,9 @@ let loadData = function() {
             planInfo.planId = userData.default_plan;
             console.log(planInfo.planId);
         }
-        $.ajax({url: "http://localhost:8081/plan", method: "GET", headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
+        $.ajax({url: "http://localhost:8081/plan", method: "GET", data: planInfo ,headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
             myPlan = new Plan(planData.plan_name, planData.catalog_year, planData.majors, planData.minors, userData.name, planData.currYear, planData.currTerm);
-            $.ajax({url: "http://localhost:8081/catalog", method: "GET", data: {year: "2021"}, dataType: "json"}).done(function(catalogData) {
+            $.ajax({url: "http://localhost:8081/catalog", method: "GET", data: {year: planData.catalog_year}, dataType: "json"}).done(function(catalogData) {
                 for (let c_id in catalogData) {
                     let credits = parseFloat(catalogData[c_id].credits);
                     let name = catalogData[c_id].name;
@@ -172,7 +176,7 @@ let loadData = function() {
                 let accord = document.getElementById("accordion");
                 let getMajor = function(majorName) {
                     let userInfo = {major: majorName};
-                    $.ajax({url: "http://localhost:8081/majorrequirements?major=Computer Science", method: "GET", dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/majorrequirements", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
                         for (let category in data) {
                             if (majorName == "Undeclared") {
                                 accord.innerHTML += '<h3>' + category + '</h3>\
@@ -206,7 +210,7 @@ let loadData = function() {
                 }
                 let getMinor = function(minorName) {
                     let userInfo = {minor: minorName};
-                    $.ajax({url: "http://localhost:8081/minorrequirements?minor=Bible", method: "GET", dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/minorrequirements", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
                         accord.innerHTML += '<h3>' + minorName + ' Minor</h3>\
                         <div id="accordion-' + minorName + '" class="accordion-tab"></div>';
                         let sectionHTML = document.getElementById("accordion-" + minorName);
@@ -223,8 +227,6 @@ let loadData = function() {
                         }
                         setTimeout(function() {
                             makeAccord();
-                            setupDragAndDrop();
-                            removeClass();
                         });
                         
                     });
@@ -314,6 +316,8 @@ let render = function() {
         searchTable.innerHTML += newRow;
     }
 
+    setupDragAndDrop();
+    removeClass();
 
 };
 
@@ -585,10 +589,17 @@ saveButton.addEventListener("click", function(event) {
     $.ajax({
         url: "http://localhost:8081/save-planned-courses", 
         method: "POST", 
-        data: savedCourses,
+        data: {courses: savedCourses, planid: planInfo.planId},
+        headers: {"Authorization": localStorage.getItem('token')},
         dataType:"json"
     }).done(function(data) {
         console.log(savedCourses);
     });
     
+}, false);
+
+let logoutButton = document.getElementById("logout");
+logoutButton.addEventListener("click", function(event) {
+    localStorage.removeItem("token");
+    window.location.reload(true);
 }, false);
