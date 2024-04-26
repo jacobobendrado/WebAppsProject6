@@ -146,8 +146,9 @@ let loadData = function() {
     $.ajax({ url: "http://localhost:8081/user", method: "GET", headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
         if (!planInfo.planId) {
             planInfo.planId = userData.default_plan;
+            console.log(planInfo.planId);
         }
-        $.ajax({url: "http://localhost:8081/plan", method: "GET", dataType: "json"}).done(function(planData) {
+        $.ajax({url: "http://localhost:8081/plan", method: "GET", headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
             myPlan = new Plan(planData.plan_name, planData.catalog_year, planData.majors, planData.minors, userData.name, planData.currYear, planData.currTerm);
             $.ajax({url: "http://localhost:8081/catalog", method: "GET", data: {year: "2021"}, dataType: "json"}).done(function(catalogData) {
                 for (let c_id in catalogData) {
@@ -567,3 +568,27 @@ function updateHours(box, inOrOut, credHour = 0){
         }
     }
 }
+
+let saveButton = document.getElementById("save");
+saveButton.addEventListener("click", function(event) {
+
+    let savedCourses = {};
+    myPlan.courses.forEach(function(course) {
+        if (!myPlan.checkHistory(course.year, course.term)) {
+            savedCourses[course.courseDesignator] = {
+                year: course.year,
+                term: course.term
+            }
+        }
+    });
+
+    $.ajax({
+        url: "http://localhost:8081/save-planned-courses", 
+        method: "POST", 
+        data: savedCourses,
+        dataType:"json"
+    }).done(function(data) {
+        console.log(savedCourses);
+    });
+    
+}, false);

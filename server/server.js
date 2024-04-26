@@ -4,10 +4,15 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const jwt = require('jsonwebtoken');
+var bodyParser = require('body-parser');
 
 const app = express();
 const port = 8081;
 
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
 
@@ -153,9 +158,6 @@ app.get('/user', (req, res) => {
             return res.status(500).send('Internal Server Error 4');
           }
       
-          console.log("Course:", course.course_id, "Credits:", credits);
-      
-
           totalCredits += credits;
 
           switch (course.grade) {
@@ -216,7 +218,10 @@ app.get('/user', (req, res) => {
 app.get('/plan', (req, res) => {
   //TODO: verify session
   //TODO: Get session user and default plan
-  const user = "asteele";
+  const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const user = decoded.user;
+  //const user = "asteele";
   const plan = "test";
 
   db.query('SELECT catalog_year FROM JAC_plan WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
@@ -393,6 +398,34 @@ app.get('/minorrequirements', (req, res) => {
   });
 });
 
+app.post('/save-planned-courses', (req, res) => {
+  console.log(req.body);
+  const plannedCourses = req.body;
+
+  const deleteQuery = `DELETE FROM JAC_planned_courses WHERE plan_name = ? AND username = ?`;
+  const deleteValues = ['test', 'asteele']; //TODO: change temp values
 
 
+  db.query(deleteQuery, deleteValues, (error, results, fields) => {
+    if (error) {
+        console.error('Error deleting existing planned courses:', error);
+        return;
+    }
+    console.log(plannedCourses);
+    for (let course_id in plannedCourses) {
+      let course = plannedCourses[course_id];
+      let query = `INSERT INTO JAC_planned_courses (plan_name, username, course_id, plan_year, term) VALUES (?, ?, ?, ?, ?)`;
+      let values = ['test', 'asteele', course_id, course.year, course.term]; //TODO: change temp values
 
+      
+      db.query(query, values, (error, results, fields) => {
+          if (error) {
+              console.error('Error saving course:', error);
+          } else {
+              console.log('Course saved successfully:', course_id);
+          }
+      });
+    }
+  });
+  res.sendStatus(200);
+});
