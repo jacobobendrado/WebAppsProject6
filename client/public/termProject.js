@@ -111,7 +111,8 @@ class Term {
         this.hours = this.#calculateHours();
     }
     removeCourse(index) {
-        return this.courses.splice(index,1)[0];
+        this.courses.splice(index,1)[0];
+        this.hours = this.#calculateHours();
     }
     #calculateHours(courses = this.courses) {
         let hours = 0;
@@ -382,16 +383,14 @@ function removeClass(box) {
             console.log(class_table);
             courses[rmButton.id].term = null;
             courses[rmButton.id].year = null;
-            if (!class_table){
-                class_accordian.classList.add('draggable');
-                class_accordian.setAttribute('draggable', true);
-                class_accordian.classList.remove('taken');
-            }
-            else{
-                class_table.classList.add('draggable');
-                class_table.setAttribute('draggable', true);
-                class_table.classList.remove('taken');
-            }
+            class_accordian.classList.add('draggable');
+            class_accordian.setAttribute('draggable', true);
+            class_accordian.classList.remove('taken');
+
+            class_table.classList.add('draggable');
+            class_table.setAttribute('draggable', true);
+            class_table.classList.remove('taken');
+            
             
             const course_plan = document.querySelector("#planned-course-" + rmButton.id);
             if (!course_plan) {
@@ -402,15 +401,15 @@ function removeClass(box) {
             let rmCourse = myPlan.removeCourse(rmButton.id);
             schedule.years.forEach(function(currYear) {
                 if (currYear.fall.courses.indexOf(rmCourse) > -1) {
-                    currYear.fall.removeCourse(rmButton.id);
+                    currYear.fall.removeCourse(currYear.fall.courses.indexOf(rmCourse));
                     console.log(rmCourse);
                 }
                 if (currYear.spring.courses.indexOf(rmCourse) > -1) {
-                    currYear.spring.removeCourse(rmButton.id);
+                    currYear.spring.removeCourse(currYear.spring.courses.indexOf(rmCourse));
                     console.log(rmCourse);
                 }
                 if (currYear.summer.courses.indexOf(rmCourse) > -1) {
-                    currYear.summer.removeCourse(rmButton.id);
+                    currYear.summer.removeCourse(currYear.summer.courses.indexOf(rmCourse));
                     console.log(rmCourse);
                 }
                 
