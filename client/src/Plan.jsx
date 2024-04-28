@@ -106,7 +106,6 @@ function Plan() {
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Credits</th>
-                                    <th>Planned?</th>
                                 </tr>
                             </thead>
                             <tbody id="search-table-data"></tbody>

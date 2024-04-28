@@ -309,12 +309,6 @@ let render = function() {
         newRow += "<td>" + courses[c_id].courseName + "</td>\n";
         newRow += "<td>" + courses[c_id].description + "</td>\n";
         newRow += "<td>" + courses[c_id].credits + "</td>\n";
-        if (courses[c_id].term) {
-            newRow += "<td>Yes</td>\n";
-        }
-        else {
-            newRow += "<td>No</td>\n";
-        }
         newRow += "</tr>";
         searchTable.innerHTML += newRow;
     }
@@ -386,6 +380,8 @@ function removeClass(box) {
             const class_table = document.querySelector("#table-" + rmButton.id);
             console.log(class_accordian);
             console.log(class_table);
+            courses[rmButton.id].term = null;
+            courses[rmButton.id].year = null;
 
             class_accordian.classList.add('draggable');
             class_accordian.setAttribute('draggable', true);
@@ -396,6 +392,9 @@ function removeClass(box) {
             class_table.classList.remove('taken');
             
             const course_plan = document.querySelector("#planned-course-" + rmButton.id);
+            if (!course_plan) {
+                return;
+            }
             let box = rmButton.parentElement.parentElement;
             course_plan.remove();
             let rmCourse = myPlan.removeCourse(rmButton.id);
@@ -519,6 +518,8 @@ function setupDragAndDrop() {
                     let [termUser, year] = termYearText.split(' ');
                     termUser = termUser.toLowerCase();
 
+                    courses[courseId].term = termUser;
+                    courses[courseId].year = year;
                     let myCourse = new Course(termUser, year, credits, courseId, courseName);
                     myPlan.addCourse(myCourse);
 
@@ -639,24 +640,34 @@ logoutButton.addEventListener("click", function(event) {
     window.location.reload(true);
 }, false);
 
-/*
-
-function(e) {
+document.getElementById("add-year").addEventListener("click", function(e) {
     schedule.years.push(new Year());
-    render();
-}
+    let nextYear = schedule.firstYear + schedule.years.length;
+    document.getElementById("grid-container").innerHTML += '<div class="sub-box">\
+    <h5>Fall '+ (nextYear - 1) + '</h5>\
+    </div>\
+    <div class="sub-box">\
+    <h5>Spring ' + nextYear + '</h5>\
+    </div>\
+    <div class="sub-box">\
+    <h5>Summer ' + nextYear + '</h5>\
+    </div>'
+    setupDragAndDrop();
+    removeClass();
+});
 
-function(e) {
+document.getElementById("remove-year").addEventListener("click", function(e) {
     let lastYear = schedule.years[schedule.years.length - 1];
     if (lastYear.fall.courses.length + lastYear.spring.courses.length + lastYear.summer.courses.length != 0) {
-        //error
+        alert("You cannot remove a year with scheduled courses.");
         return;
     }
-    schedule.years.pop()?
-    render();
-}
+    schedule.years.pop();
+    let grid = document.getElementById("grid-container");
 
-//TODO: get accordian working
+    grid.removeChild(grid.lastElementChild);
+    grid.removeChild(grid.lastElementChild);
+    grid.removeChild(grid.lastElementChild);
+});
+
 //TODO: get green for taken courses to updata on render()
-
-*/
