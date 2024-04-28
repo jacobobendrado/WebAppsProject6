@@ -10,7 +10,7 @@ var notesspan = document.getElementById("close-notes-modal");
 // When the user clicks on the button, open the modal
 notesbtn.onclick = function() {
     notesmodal.style.display = "block";
-    showNotes();
+    getNotes();
 }
 
 // When the user clicks on <span> (x), close the modal
@@ -30,7 +30,7 @@ console.log("Welcome to notes app. This is app.js");
 
 
 // If user adds a note, add it to the localStorage
-/*
+
 let addBtn = document.getElementById("addBtn");
 addBtn.addEventListener("click", function (e) {
   let addTxt = document.getElementById("addTxt");
@@ -45,34 +45,28 @@ addBtn.addEventListener("click", function (e) {
   addTxt.value = "";
   showNotes();
 });
-*/
 
-// Function to show elements from localStorage
+
 function showNotes() {
-  //let notes = localStorage.getItem("notes");
-  let notes = '{      "JAC_notes":[{"username":"ceppich", "note":"who is this sapple"},{"username":"asteele", "note":"lalalalala"},        {"username":"ceppich", "note":"who is sus"}      ]    }'
-
-  console.log(notes);
-
-  notes = null;
-
+  let notes = localStorage.getItem("notes");
   if (notes == null) {
     notesObj = [];
   } else {
     notesObj = JSON.parse(notes);
   }
-  let html = "";
 
-  notes.forEach(function (element, index) {
+  let html = "";
+  notesObj.forEach(function(element, index) {
     html += `
-            <div class="noteCard my-2 mx-2 card" style="width: 18rem">
-                    <div class="card-body">
-                        <h5 class="card-title">Note ${index + 1}</h5>
-                        <p class="card-text"> ${element}</p>
-                        <button class="btn btn-primary">Delete Note</button>
-                    </div>
-                </div>`;
+      <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">Note ${index + 1}</h5>
+          <p class="card-text">${element}</p>
+          <button class="btn btn-primary" onclick="deleteNote(${index})">Delete Note</button>
+        </div>
+      </div>`;
   });
+
   let notesElm = document.getElementById("notes");
   if (notesObj.length != 0) {
     notesElm.innerHTML = html;
@@ -81,10 +75,8 @@ function showNotes() {
   }
 }
 
-// Function to delete a note
-function deleteNote(index) {
-  //   console.log("I am deleting", index);
 
+function deleteNote(index) {
   let notes = localStorage.getItem("notes");
   if (notes == null) {
     notesObj = [];
@@ -93,6 +85,21 @@ function deleteNote(index) {
   }
 
   notesObj.splice(index, 1);
+
   localStorage.setItem("notes", JSON.stringify(notesObj));
+
   showNotes();
+}
+
+function getNotes() {
+  $.ajax({
+    url: "http://localhost:8081/getnotes", 
+    method: "GET", 
+    headers: {"Authorization": localStorage.getItem('token')},
+    dataType:"json"
+}).done(function(notesData) {
+  localStorage.setItem("notes", JSON.stringify(notesData.notes));
+  showNotes();
+});
+
 }

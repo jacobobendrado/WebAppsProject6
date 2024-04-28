@@ -245,11 +245,12 @@ let loadData = function() {
     }).fail(function(error) {
         console.log("There was an error: " + error.responseText);
     }, 50);
+    /*
     $.ajax({ url: "http://localhost:8081/notes", method: "GET", headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(notesData) {
 
     }).fail(function(error) {
         console.log("Notes error: " + error.responseText);
-    });
+    });*/
 }
 setTimeout(function() {
     loadData();
@@ -613,14 +614,21 @@ saveButton.addEventListener("click", function(event) {
         }
     });
 
+    let notes = localStorage.getItem("notes");
+
     $.ajax({
         url: "http://localhost:8081/save-planned-courses", 
         method: "POST", 
         data: {courses: savedCourses, planid: planInfo.planId},
         headers: {"Authorization": localStorage.getItem('token')},
         dataType:"json"
-    }).done(function(data) {
-        console.log(savedCourses);
+    });
+    $.ajax({
+        url: "http://localhost:8081/save-notes", 
+        method: "POST", 
+        data: {usrNotes: notes},
+        headers: {"Authorization": localStorage.getItem('token')},
+        dataType:"json"
     });
     
 }, false);

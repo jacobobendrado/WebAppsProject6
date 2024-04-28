@@ -389,7 +389,7 @@ app.get('/minorrequirements', (req, res) => {
 });
 
 app.post('/save-planned-courses', (req, res) => {
-    const token = req.headers['authorization'];
+  const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
   const user = decoded.user;
   const plan = req.body.planid;
@@ -423,3 +423,61 @@ app.post('/save-planned-courses', (req, res) => {
   res.sendStatus(200);
 });
 
+app.get('/getnotes', (req, res) => {
+  const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const user = decoded.user;
+
+  const query = 'SELECT note FROM JAC_notes WHERE username = ?';
+
+  db.query(query, [user], (error, results) => {
+    if (error) {
+      console.error('Error fetching notes:', error);
+      return res.status(500).send('Failed to fetch notes');
+    }
+
+    const userNotes = results.map(result => result.note);
+
+    const response = {
+      user: user,
+      notes: userNotes
+    };
+
+    res.json(response);
+  });
+});
+
+app.post('/save-notes', (req, res) => {
+  const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const user = decoded.user;
+  const notes = JSON.parse(req.body.usrNotes);
+  
+
+  if (!notes || notes.length === 0) {
+      return res.status(400).send('No notes to save');
+  }
+
+  const query = 'INSERT INTO JAC_notes (username, note) VALUES ?';
+  const values = [user, notes];
+
+  const deleteQuery = `DELETE FROM JAC_notes WHERE username = ?`;
+  const deleteValues = user;
+
+  console.log(notes);
+  db.query(deleteQuery, deleteValues, (error, results, fields) => {
+    if (error) {
+        console.error('Error deleting existing notes:', error);
+        return;
+    }
+    const values = notes.map(note => [user, note]);
+    db.query(query, [values], (error, results) => {
+        if (error) {
+            console.error('Error saving notes:', error);
+            return res.status(500).send('Failed to save notes');
+        }
+        console.log('Notes saved successfully');
+        res.sendStatus(200);
+    });
+  });
+});

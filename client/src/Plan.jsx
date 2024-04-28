@@ -41,14 +41,14 @@ function Plan() {
 
         <div id="notes-modal" class="modal">
             <div class="modal-content">
-            <span class="close" id='close-notes-modal'>&times;</span>
+                <span class="close" id='close-notes-modal'>&times;</span>
                 <h3 id="medium-header-2">Notes Manager</h3>
-                    <textarea name="notes-entry" placeholder="Add a note..." rows="10" cols="60"></textarea>
-                    <form id="submit-form">
-                        <label></label><br></br>
-                        <button id="add-note" name="add-note"> Add Note </button>
-                    </form>  
-                    <p>My Notes</p>
+                <div class="form-group">
+                    <textarea class="form-control" id="addTxt" rows="8" cols="60"></textarea>
+                </div>
+                <button id="addBtn"> Add Note </button>
+                <p>My Notes</p>
+                <div id="notes" class="row container-fluid"></div>
             </div>
         </div>
 
