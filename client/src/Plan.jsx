@@ -81,9 +81,7 @@ function Plan() {
                     <h3 id="medium-header-2">Home Pages</h3>
                     <div class="buttons horizontal-buttons">
                         <button class="tr" id="add-year">Add Year</button>
-                        <br></br>
                         <button class="tr" id="remove-year">Remove Year</button>
-                        <br></br>
                         <button class="tr" id="manage-notes">Notes</button>
                     </div>
             </div>

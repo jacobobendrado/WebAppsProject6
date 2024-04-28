@@ -176,7 +176,7 @@ let loadData = function() {
                 let accord = document.getElementById("accordion");
                 let getMajor = function(majorName) {
                     let userInfo = {major: majorName};
-                    $.ajax({url: "http://localhost:8081/majorrequirements", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/majorrequirements", method: "GET", data: userInfo, dataType: "json", async: false}).done(function(data) {
                         for (let category in data) {
                             if (majorName == "Undeclared") {
                                 accord.innerHTML += '<h3>' + category + '</h3>\
@@ -210,7 +210,7 @@ let loadData = function() {
                 }
                 let getMinor = function(minorName) {
                     let userInfo = {minor: minorName};
-                    $.ajax({url: "http://localhost:8081/minorrequirements", method: "GET", data: userInfo, dataType: "json"}).done(function(data) {
+                    $.ajax({url: "http://localhost:8081/minorrequirements", method: "GET", data: userInfo, dataType: "json", async: false}).done(function(data) {
                         accord.innerHTML += '<h3>' + minorName + ' Minor</h3>\
                         <div id="accordion-' + minorName + '" class="accordion-tab"></div>';
                         let sectionHTML = document.getElementById("accordion-" + minorName);
@@ -225,9 +225,6 @@ let loadData = function() {
                             });
                             
                         }
-                        setTimeout(function() {
-                            makeAccord();
-                        });
                         
                     });
                 }
@@ -248,6 +245,11 @@ let loadData = function() {
     }).fail(function(error) {
         console.log("There was an error: " + error.responseText);
     }, 50);
+    $.ajax({ url: "http://localhost:8081/notes", method: "GET", headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(notesData) {
+
+    }).fail(function(error) {
+        console.log("Notes error: " + error.responseText);
+    });
 }
 setTimeout(function() {
     loadData();
@@ -316,6 +318,7 @@ let render = function() {
         searchTable.innerHTML += newRow;
     }
 
+    makeAccord();
     setupDragAndDrop();
     removeClass();
 
@@ -642,6 +645,7 @@ function(e) {
         return;
     }
     schedule.years.pop()?
+    render();
 }
 
 //TODO: get accordian working

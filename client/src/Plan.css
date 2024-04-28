@@ -107,11 +107,7 @@ body {
   }   
 }
 
-.horizontal-buttons {
-  flex-direction: column;
-}
-
-.header .buttons{ 
+.buttons{ 
   display: flex;
   flex: 0 1 45%;
   justify-content: flex-end;
@@ -119,7 +115,12 @@ body {
   align-items: center;  
 }
 
-.header .buttons .tr {
+.horizontal-buttons {
+  flex-direction: column;
+}
+
+
+.buttons .tr {
   background-color: #D1D5DB;
   border: 2px solid #1F2937;
   border-radius: 8px;
@@ -138,11 +139,11 @@ body {
   touch-action: manipulation;
 }   
 
-.header .buttons .tr:hover{
+.buttons .tr:hover{
   background-color: #F3F4F6;
 }
 
-.header .buttons .tr:active {
+.buttons .tr:active {
   box-shadow: #422800 2px 2px 0 0;
   transform: translate(2px, 2px);
 }
@@ -459,10 +460,6 @@ body {
   color: red;
   text-decoration: none;
   cursor: pointer;
-}
-
-.plan-buttons {
-  
 }
 
 .close:hover {
