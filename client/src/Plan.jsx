@@ -65,9 +65,7 @@ function Plan() {
             <div class="buttons">
                 <button class="tr" id="manage-plans">Plan Manager</button>
                 <button class="tr" id="save">Save</button>
-                <a href="php/logout.php">
-                    <button class="tr" id="logout">Log out</button>
-                </a>
+                <button class="tr" id="logout">Log out</button>
             </div>
         </div>
         <div id="left-main" class="top">
@@ -106,6 +104,7 @@ function Plan() {
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Credits</th>
+                                    <th>Planned?</th>
                                 </tr>
                             </thead>
                             <tbody id="search-table-data"></tbody>
