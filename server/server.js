@@ -35,7 +35,7 @@ const verifyPassword = (password, hash) => {
 
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
-  const sql = "SELECT username, password FROM JAC_users WHERE username = ?;";
+  const sql = "SELECT username, password, role FROM JAC_users WHERE username = ?;";
 
   db.query(sql, [username], (err, data) => {
       if (err) {

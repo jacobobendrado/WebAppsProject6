@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, createBrowserRouter, RouterProvider } fro
 
 import Plan from './Plan.jsx'
 import Login from './Login.jsx'
+import Faculty from './Faculty.jsx'
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />
+  },
+  {
+    path: "/faculty",
+    element: <Faculty />
   }
 ])
 
