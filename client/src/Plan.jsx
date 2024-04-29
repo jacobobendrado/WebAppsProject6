@@ -25,10 +25,7 @@ function Plan() {
         <div class="modal-content">
         <span class="close" id='close-plans-modal'>&times;</span>
             <h3 id="medium-header-1">Plan Manager</h3>
-                <form id="submit-form">
-                    <input type="radio" name="button-plan" value=""></input>
-                    <label></label><br></br>
-                    <button id="submit-plan" name="submit-plan"> View </button>
+                <form id="plan-form">
                 </form>  
             </div>
         </div>

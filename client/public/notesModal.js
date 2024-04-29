@@ -36,7 +36,7 @@ addBtn.addEventListener("click", function (e) {
     }
     notesObj.facultyNotes.push(addTxt.value);
   } else {
-    notesObj.notes.push(addTxt.value);
+    notesObj.push(addTxt.value);
   }
 
   localStorage.setItem("notes", JSON.stringify(notesObj));

@@ -444,14 +444,14 @@ app.post('/save-planned-courses', (req, res) => {
 
   const plannedCourses = req.body.courses;
   const deleteQuery = `DELETE FROM JAC_planned_courses WHERE plan_name = ? AND username = ?`;
-  const deleteValues = [plan, user];
 
   if (decoded.faculty.isFaculty) {
-    user = req.query.username;
+    user = req.body.username;
     if (decoded.faculty.students.indexOf(user) < 0) {
-        return res.redirect("http://localhost:5173/faculty");
+        return res.status(500).send('Not allowed to save for user ' + user);
     }
   }
+  const deleteValues = [plan, user];
 
   db.query(deleteQuery, deleteValues, (error, results, fields) => {
     if (error) {
@@ -537,15 +537,43 @@ app.get('/getnotes', (req, res) => {
   }
 });
 
+app.get('/getplans', (req, res) => {
+  const token = req.headers['authorization'];
+  const decoded = jwt.verify(token, 'SECRET');
+  const isFaculty = decoded.faculty.isFaculty;
+  let username = decoded.user;
+
+  if (isFaculty) {
+    username = req.query.username;
+  }
+
+  const studentPlansQuery = 'SELECT plan_name FROM JAC_plan WHERE username = ?';
+
+    db.query(studentPlansQuery, [username], (error, planResults) => {
+      if (error) {
+        console.error('Error fetching faculty notes:', error);
+        return res.status(500).send('Failed to fetch faculty notes');
+      }
+
+      const plans = planResults.map(plan => plan.plan_name);
+      const response = {
+        studentplans: plans,
+      };
+
+        res.json(response);
+      });
+
+});
+
 app.post('/save-notes', (req, res) => {
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
   const isFaculty = decoded.faculty.isFaculty;
-  const notes = JSON.parse(req.body.usrNotes);
-
-  if (!notes || notes.length === 0) {
+  if (!req.body.usrNotes || req.body.usrNotes == 'undefined') {
     return res.status(400).send('No notes to save');
   }
+  const notes = JSON.parse(req.body.usrNotes);
+
 
   if (isFaculty) {
     const facultyUsername = decoded.user;

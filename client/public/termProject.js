@@ -143,6 +143,9 @@ const urlParameters = new URLSearchParams(window.location.search);
 if (urlParameters.get('username')) {
     planInfo.username = urlParameters.get('username');
 }
+if (urlParameters.get('planname')) {
+    planInfo.planId = urlParameters.get('planname');
+}
 let loadData = function() {
     const token = localStorage.getItem("token");
     $.ajax({ url: "http://localhost:8081/user", method: "GET", data: planInfo, headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
@@ -247,7 +250,7 @@ let loadData = function() {
 setTimeout(function() {
     loadData();
 
-}, 50);
+}, 100);
 
 let courseSearchText = document.getElementById("search-bar");
 
@@ -656,3 +659,18 @@ document.getElementById("remove-year").addEventListener("click", function(e) {
     grid.removeChild(grid.lastElementChild);
     grid.removeChild(grid.lastElementChild);
 });
+
+let planForm = document.getElementById("plan-form");
+planForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+    const formData = new FormData(planForm);
+    for (const entry of formData) {
+        planInfo.planId = entry[1];
+    }
+    let newHref = window.location.href.split("?")[0] + "?";
+    if (planInfo.username) {
+        newHref += "username=" + planInfo.username + "&";
+    }
+    newHref += "planname=" + planInfo.planId;
+    window.location.href = newHref;
+}, false);
