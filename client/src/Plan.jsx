@@ -2,18 +2,12 @@ import { useState } from 'react'
 import {Helmet} from "react-helmet";
 import React, { useEffect } from 'react';
 function Plan() {
-  const [count, setCount] = useState(0)
-/*
-  useEffect(() => {
-    const scriptTag = document.createElement('script');
-    scriptTag.src = "/Users/alexbluesteele/Documents/WebappsProject6/WebAppsProject6/client/public/termProject.js";
-    scriptTag.type = "text/javascript";
-    document.body.appendChild(scriptTag);
-  });*/
-  console.log(localStorage.getItem('token'));
-  if(!localStorage.getItem('token')){
-    window.location.href = "http://localhost:5173/login";
-  }
+    const [count, setCount] = useState(0)
+
+    if(!localStorage.getItem('token')){
+        window.location.href = "/login";
+    }
+
   return (
     <>
         <Helmet>

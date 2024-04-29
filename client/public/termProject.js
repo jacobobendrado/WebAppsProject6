@@ -143,17 +143,14 @@ const urlParameters = new URLSearchParams(window.location.search);
 if (urlParameters.get('username')) {
     planInfo.username = urlParameters.get('username');
 }
-if (urlParameters.get('planname')) {
-    planInfo.planId = urlParameters.get('planname');
-} 
 let loadData = function() {
     const token = localStorage.getItem("token");
-    $.ajax({ url: "http://localhost:8081/user", method: "GET", headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
+    $.ajax({ url: "http://localhost:8081/user", method: "GET", data: planInfo, headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
         if (!planInfo.planId) {
             planInfo.planId = userData.default_plan;
             console.log(planInfo.planId);
         }
-        $.ajax({url: "http://localhost:8081/plan", method: "GET", data: planInfo ,headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
+        $.ajax({url: "http://localhost:8081/plan", method: "GET", data: planInfo, headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
             myPlan = new Plan(planData.plan_name, planData.catalog_year, planData.majors, planData.minors, userData.name, planData.currYear, planData.currTerm);
             $.ajax({url: "http://localhost:8081/catalog", method: "GET", data: {year: planData.catalog_year}, dataType: "json"}).done(function(catalogData) {
                 for (let c_id in catalogData) {
@@ -621,14 +618,14 @@ saveButton.addEventListener("click", function(event) {
     $.ajax({
         url: "http://localhost:8081/save-planned-courses", 
         method: "POST", 
-        data: {courses: savedCourses, planid: planInfo.planId},
+        data: {courses: savedCourses, planid: planInfo.planId, username: planInfo.username},
         headers: {"Authorization": localStorage.getItem('token')},
         dataType:"json"
     });
     $.ajax({
         url: "http://localhost:8081/save-notes", 
         method: "POST", 
-        data: {usrNotes: notes},
+        data: {usrNotes: notes, username: planInfo.username},
         headers: {"Authorization": localStorage.getItem('token')},
         dataType:"json"
     });
@@ -644,14 +641,15 @@ logoutButton.addEventListener("click", function(event) {
 document.getElementById("add-year").addEventListener("click", function(e) {
     schedule.years.push(new Year());
     let nextYear = schedule.firstYear + schedule.years.length;
-    document.getElementById("grid-container").innerHTML += '<div class="sub-box">\
-    <h5>Fall '+ (nextYear - 1) + '</h5>\
+    document.getElementById("grid-container").innerHTML += '\
+    <div class="sub-box">\
+        <h5>Fall '+ (nextYear - 1) + '</h5>\
     </div>\
     <div class="sub-box">\
-    <h5>Spring ' + nextYear + '</h5>\
+        <h5>Spring ' + nextYear + '</h5>\
     </div>\
     <div class="sub-box">\
-    <h5>Summer ' + nextYear + '</h5>\
+        <h5>Summer ' + nextYear + '</h5>\
     </div>'
     setupDragAndDrop();
     removeClass();

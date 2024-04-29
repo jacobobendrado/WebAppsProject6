@@ -1,35 +1,24 @@
-// Get the modal
 var notesmodal = document.getElementById("notes-modal");
 
-// Get the button that opens the modal
 var notesbtn = document.getElementById("manage-notes");
 
-// Get the <span> element that closes the modal
 var notesspan = document.getElementById("close-notes-modal");
 
-// When the user clicks on the button, open the modal
 notesbtn.onclick = function() {
     notesmodal.style.display = "block";
     getNotes();
 }
 
-// When the user clicks on <span> (x), close the modal
 notesspan.onclick = function() {
     notesmodal.style.display = "none";
 }
 
-// When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == notesmodal) {
     notesmodal.style.display = "none";
   }
 }
 
-
-console.log("Welcome to notes app. This is app.js");
-
-
-// If user adds a note, add it to the localStorage
 
 let addBtn = document.getElementById("addBtn");
 addBtn.addEventListener("click", function (e) {
@@ -95,6 +84,7 @@ function getNotes() {
   $.ajax({
     url: "http://localhost:8081/getnotes", 
     method: "GET", 
+    data: {username: urlParameters.get('username')},
     headers: {"Authorization": localStorage.getItem('token')},
     dataType:"json"
 }).done(function(notesData) {

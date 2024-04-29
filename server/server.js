@@ -34,31 +34,53 @@ const verifyPassword = (password, hash) => {
 };
 
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const sql = "SELECT username, password, role FROM JAC_users WHERE username = ?;";
+    const { username, password } = req.body;
+    const sql = "SELECT username, password, role FROM JAC_users WHERE username = ?;";
 
-  db.query(sql, [username], (err, data) => {
-      if (err) {
-          console.error("Error:", err);
-          return res.json("Login Failed");
-      }
-      if (data.length > 0) {
-          
-          const user = data[0];
-          if (verifyPassword(password, user.password)) {
-              const tokenPayload = {
-                user: username,
-              };
-              const accessToken = jwt.sign(tokenPayload, 'SECRET');
+    db.query(sql, [username], (err, data) => {
+        if (err) {
+            console.error("Error:", err);
+            return res.json("Login Failed");
+        }
+        if (data.length > 0) {
+            
+            const user = data[0];
+            if (verifyPassword(password, user.password)) {
+                let facultyData = { isFaculty: false };
+                if (user.role == 1) {
+                    facultyData.isFaculty = true;
+                    facultyData.students = [];
+                    const studentsSql = "SELECT advisee FROM JAC_advisor WHERE advisor = ?;";
+                    db.query(studentsSql, [username], (err, students) => {
+                        students.forEach(function(student) {
+                            facultyData.students.push(student.advisee);
+                        });
+              
+                        const tokenPayload = {
+                          user: username,
+                          faculty: facultyData
+                        };
+                        const accessToken = jwt.sign(tokenPayload, 'SECRET');
+        
+                        return res.json(accessToken);
+                    });
+                }
+                else {
+                    const tokenPayload = {
+                        user: username,
+                        faculty: facultyData
+                    };
+                    const accessToken = jwt.sign(tokenPayload, 'SECRET');
 
-              return res.json(accessToken);
-          } else {
-              return res.json("Login Failed: Invalid username or password");
-          }
-      } else {
-          return res.json("Login Failed: Invalid username or password");
-      }
-  });
+                    return res.json(accessToken);
+                }
+            } else {
+                return res.json("Login Failed: Invalid username or password");
+            }
+        } else {
+            return res.json("Login Failed: Invalid username or password");
+        }
+    });
 });
 
 app.get('/catalog', (req, res) => {
@@ -103,10 +125,17 @@ app.get('/catalog', (req, res) => {
 });
 
 app.get('/user', (req, res) => {
-  //TODO: verify session
+
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
-  const user = decoded.user;
+  let user = decoded.user;
+
+  if (decoded.faculty.isFaculty) {
+    user = req.query.username;
+    if (decoded.faculty.students.indexOf(user) < 0) {
+        return res.redirect("http://localhost:5173/faculty");
+    }
+  }
 
   db.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
     if (error) {
@@ -131,88 +160,107 @@ app.get('/user', (req, res) => {
 
       var courseIds = courses.map(course => course.course_id);
       const query = 'SELECT credits FROM JAC_course WHERE course_id IN (?)';
-      
-      db.query(query, [courseIds], (error, creditRows) => {
-        if (error) {
-          console.error('Error fetching credits:', error);
-          return res.status(500).send('Internal Server Error 3');
-        }
-      
-        const creditMap = new Map();
-        for(var i = 0; i < courseIds.length; i++) {
-          creditMap.set(courseIds[i], creditRows[i].credits);
-        }
 
-        courses.forEach(course => {
-          const credits = creditMap.get(course.course_id);
-          if (!credits) {
-            console.error('Credits not found for course:', course.course_id);
-            return res.status(500).send('Internal Server Error 4');
-          }
-      
-          totalCredits += credits;
-
-          switch (course.grade) {
-            case 'A':
-              gradePoints += credits * 4.0;
-              break;
-            case 'A-':
-              gradePoints += credits * 3.7;
-              break;
-            case 'B+':
-              gradePoints += credits * 3.3;
-              break;
-            case 'B':
-              gradePoints += credits * 3.0;
-              break;
-            case 'B-':
-              gradePoints += credits * 2.7;
-              break;
-            case 'C+':
-              gradePoints += credits * 2.3;
-              break;
-            case 'C':
-              gradePoints += credits * 2.0;
-              break;
-            case 'C-':
-              gradePoints += credits * 1.7;
-              break;
-            case 'D+':
-              gradePoints += credits * 1.3;
-              break;
-            case 'D':
-              gradePoints += credits * 1.0;
-              break;
-            case 'D-':
-              gradePoints += credits * 0.7;
-              break;
-            case 'F':
-              break;
-            default:
-              console.error('Invalid grade:', course.grade);
-              return res.status(500).send('Internal Server Error 5');
-          }
-        });
-
-        const gpa = totalCredits ? gradePoints / totalCredits : 0.0;
-
+      if (courses.length == 0) {
         res.json({
           name: userData.name,
           catalog_year: userData.catalog_year,
-          gpa: gpa,
+          gpa: 0.0,
           default_plan: userData.default_plan
         });
-      });
+      }
+      else {
+      
+        db.query(query, [courseIds], (error, creditRows) => {
+            if (error) {
+            console.error('Error fetching credits:', error);
+            return res.status(500).send('Internal Server Error 3');
+            }
+        
+            const creditMap = new Map();
+            for(var i = 0; i < courseIds.length; i++) {
+            creditMap.set(courseIds[i], creditRows[i].credits);
+            }
+
+            courses.forEach(course => {
+            const credits = creditMap.get(course.course_id);
+            if (!credits) {
+                console.error('Credits not found for course:', course.course_id);
+                return res.status(500).send('Internal Server Error 4');
+            }
+        
+            totalCredits += credits;
+
+            switch (course.grade) {
+                case 'A':
+                gradePoints += credits * 4.0;
+                break;
+                case 'A-':
+                gradePoints += credits * 3.7;
+                break;
+                case 'B+':
+                gradePoints += credits * 3.3;
+                break;
+                case 'B':
+                gradePoints += credits * 3.0;
+                break;
+                case 'B-':
+                gradePoints += credits * 2.7;
+                break;
+                case 'C+':
+                gradePoints += credits * 2.3;
+                break;
+                case 'C':
+                gradePoints += credits * 2.0;
+                break;
+                case 'C-':
+                gradePoints += credits * 1.7;
+                break;
+                case 'D+':
+                gradePoints += credits * 1.3;
+                break;
+                case 'D':
+                gradePoints += credits * 1.0;
+                break;
+                case 'D-':
+                gradePoints += credits * 0.7;
+                break;
+                case 'F':
+                break;
+                default:
+                console.error('Invalid grade:', course.grade);
+                return res.status(500).send('Internal Server Error 5');
+            }
+            });
+
+            const gpa = totalCredits ? gradePoints / totalCredits : 0.0;
+
+            res.json({
+            name: userData.name,
+            catalog_year: userData.catalog_year,
+            gpa: gpa,
+            default_plan: userData.default_plan
+            });
+        });
+    }
     });
+
   });
 });
 
 app.get('/plan', (req, res) => {
-  //TODO: verify session
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
-  const user = decoded.user;
+  let user = decoded.user;
   const plan = req.query.planId;
+
+  
+  if (decoded.faculty.isFaculty) {
+    user = req.query.username;
+    if (decoded.faculty.students.indexOf(user) < 0) {
+        return res.redirect("http://localhost:5173/faculty");
+    }
+  }
 
   db.query('SELECT catalog_year FROM JAC_plan WHERE username = ? AND plan_name = ?', [user, plan], (error, results) => {
     if (error) {
@@ -391,13 +439,19 @@ app.get('/minorrequirements', (req, res) => {
 app.post('/save-planned-courses', (req, res) => {
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
-  const user = decoded.user;
+  let user = decoded.user;
   const plan = req.body.planid;
 
   const plannedCourses = req.body.courses;
   const deleteQuery = `DELETE FROM JAC_planned_courses WHERE plan_name = ? AND username = ?`;
   const deleteValues = [plan, user];
 
+  if (decoded.faculty.isFaculty) {
+    user = req.query.username;
+    if (decoded.faculty.students.indexOf(user) < 0) {
+        return res.redirect("http://localhost:5173/faculty");
+    }
+  }
 
   db.query(deleteQuery, deleteValues, (error, results, fields) => {
     if (error) {

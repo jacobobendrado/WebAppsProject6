@@ -1,34 +1,29 @@
-import { useState } from 'react'
-import axios from 'axios'
-
 import {Helmet} from "react-helmet";
+
 function Faculty() {
-    const [count, setCount] = useState(0)
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
 
     return (
         <>
         <Helmet>
             <link href="src/Faculty.css" rel="stylesheet" type="text/css" />
+            <script src="public/faculty.js" defer></script>
         </Helmet>
         <div class="container">
             <div class="login-container-wrapper">
                 <div class="logo">
                 </div>
-                <div class="welcome"><strong>Welcome,</strong> please login</div>
-
-                <form class="login-form" onSubmit={handleSubmit}>
-                    <div class="form-group">
-                        <input id="login_username" class="form-control" type="username" placeholder="Username" name="username" required onChange={e => setUsername(e.target.value)}/>
+                <div class="faculty-title"><strong>Faculty Home!</strong></div>
+                <div id="student-table">
+                        <table>
+                            <thead id="student-table-head">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Page</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-data"></tbody>
+                        </table>
                     </div>
-                    <div class="form-group">
-                        <input id="login_password" class="form-control" type="password" placeholder="Password" name="password" required onChange={e => setPassword(e.target.value)}/>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn">Login</button>
-                    </div>
-                </form>
             </div>
         </div>
         </>

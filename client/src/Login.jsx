@@ -12,7 +12,15 @@ function Login() {
         axios.post('http://localhost:8081/login', {username, password})
         .then(res => {
             localStorage.setItem("token", res.data);
-            window.location.href = "http://localhost:5173/";
+            let tokenData = atob(res.data.split('.')[1]);
+            let data = JSON.parse(tokenData);
+        
+            if (data.faculty.isFaculty) {
+                window.location.href = "/faculty";
+            }
+            else {
+                window.location.href = "/";
+            }
         })
         .catch(err=> console.log(err));
     }
