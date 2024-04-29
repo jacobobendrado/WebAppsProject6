@@ -41,7 +41,6 @@ function Plan() {
                     <textarea class="form-control" id="addTxt" rows="8" cols="60"></textarea>
                 </div>
                 <button id="addBtn"> Add Note </button>
-                <p>My Notes</p>
                 <div id="notes" class="row container-fluid"></div>
             </div>
         </div>

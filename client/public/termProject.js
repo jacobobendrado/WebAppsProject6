@@ -243,12 +243,6 @@ let loadData = function() {
     }).fail(function(error) {
         console.log("There was an error: " + error.responseText);
     }, 50);
-    /*
-    $.ajax({ url: "http://localhost:8081/notes", method: "GET", headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(notesData) {
-
-    }).fail(function(error) {
-        console.log("Notes error: " + error.responseText);
-    });*/
 }
 setTimeout(function() {
     loadData();
@@ -411,10 +405,6 @@ function removeClass(box) {
                 }
                 
             })
-            console.log(rmButton);
-            
-            console.log(box);
-            //console.log(rmButton.parentNode.parentNode);
             class_accordian.addEventListener('dragstart', handleDragStart);
             class_table.addEventListener('dragstart', handleDragStart);
             updateHours(box, 'out');
@@ -564,11 +554,9 @@ function updateHours(box, inOrOut, credHour = 0){
 
     let hoursElement = document.getElementById('hours' + termUser + year);
 
-    // Check if there are any courses in the current box
     let coursesPresent = box.querySelectorAll('.planned-course').length > 0;
     console.log(box.querySelectorAll('.planned-course'));
     if (coursesPresent == false && inOrOut == 'out' && hoursElement) {
-        // If no courses present, remove the hours tag
         hoursElement.remove();
         exit;
     }
@@ -668,5 +656,3 @@ document.getElementById("remove-year").addEventListener("click", function(e) {
     grid.removeChild(grid.lastElementChild);
     grid.removeChild(grid.lastElementChild);
 });
-
-//TODO: get green for taken courses to updata on render()

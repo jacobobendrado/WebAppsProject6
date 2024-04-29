@@ -480,58 +480,136 @@ app.post('/save-planned-courses', (req, res) => {
 app.get('/getnotes', (req, res) => {
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
-  const user = decoded.user;
+  const isFaculty = decoded.faculty.isFaculty;
 
-  const query = 'SELECT note FROM JAC_notes WHERE username = ?';
+  if (isFaculty) {
+    const facultyUsername = decoded.user;
+    const studentUsername = req.query.username;
 
-  db.query(query, [user], (error, results) => {
-    if (error) {
-      console.error('Error fetching notes:', error);
-      return res.status(500).send('Failed to fetch notes');
-    }
+    const facultyNotesQuery = 'SELECT note FROM JAC_notes WHERE username = ?';
+    const studentNotesQuery = 'SELECT note FROM JAC_notes WHERE username = ?';
 
-    const userNotes = results.map(result => result.note);
+    db.query(facultyNotesQuery, [facultyUsername], (error, facultyResults) => {
+      if (error) {
+        console.error('Error fetching faculty notes:', error);
+        return res.status(500).send('Failed to fetch faculty notes');
+      }
 
-    const response = {
-      user: user,
-      notes: userNotes
-    };
+      const facultyNotes = facultyResults.map(result => result.note);
 
-    res.json(response);
-  });
+      db.query(studentNotesQuery, [studentUsername], (error, studentResults) => {
+        if (error) {
+          console.error('Error fetching student notes:', error);
+          return res.status(500).send('Failed to fetch student notes');
+        }
+
+        const studentNotes = studentResults.map(result => result.note);
+
+        const response = {
+          faculty: facultyUsername,
+          student: studentUsername,
+          facultyNotes: facultyNotes,
+          studentNotes: studentNotes
+        };
+
+        res.json(response);
+      });
+    });
+  } else {
+    const user = decoded.user;
+    const query = 'SELECT note FROM JAC_notes WHERE username = ?';
+
+    db.query(query, [user], (error, results) => {
+      if (error) {
+        console.error('Error fetching notes:', error);
+        return res.status(500).send('Failed to fetch notes');
+      }
+
+      const userNotes = results.map(result => result.note);
+
+      const response = {
+        user: user,
+        notes: userNotes
+      };
+
+      res.json(response);
+    });
+  }
 });
 
 app.post('/save-notes', (req, res) => {
   const token = req.headers['authorization'];
   const decoded = jwt.verify(token, 'SECRET');
-  const user = decoded.user;
+  const isFaculty = decoded.faculty.isFaculty;
   const notes = JSON.parse(req.body.usrNotes);
-  
 
   if (!notes || notes.length === 0) {
-      return res.status(400).send('No notes to save');
+    return res.status(400).send('No notes to save');
   }
 
-  const query = 'INSERT INTO JAC_notes (username, note) VALUES ?';
-  const values = [user, notes];
+  if (isFaculty) {
+    const facultyUsername = decoded.user;
+    const studentUsername = req.body.username;
 
-  const deleteQuery = `DELETE FROM JAC_notes WHERE username = ?`;
-  const deleteValues = user;
+    const facultyNotes = notes.facultyNotes || [];
+    const studentNotes = notes.studentNotes || [];
 
-  console.log(notes);
-  db.query(deleteQuery, deleteValues, (error, results, fields) => {
-    if (error) {
-        console.error('Error deleting existing notes:', error);
-        return;
-    }
-    const values = notes.map(note => [user, note]);
-    db.query(query, [values], (error, results) => {
+    const deleteFacultyQuery = `DELETE FROM JAC_notes WHERE username = ?`;
+    db.query(deleteFacultyQuery, [facultyUsername], (error, results, fields) => {
+      if (error) {
+        console.error('Error deleting existing faculty notes:', error);
+        return res.status(500).send('Failed to delete existing faculty notes');
+      }
+
+      const facultyValues = facultyNotes.map(note => [facultyUsername, note]);
+      const insertFacultyQuery = 'INSERT INTO JAC_notes (username, note) VALUES ?';
+      db.query(insertFacultyQuery, [facultyValues], (error, results) => {
         if (error) {
-            console.error('Error saving notes:', error);
-            return res.status(500).send('Failed to save notes');
+          console.error('Error saving faculty notes:', error);
+          return res.status(500).send('Failed to save faculty notes');
+        }
+        console.log('Faculty notes saved successfully');
+      });
+    });
+
+    const deleteStudentQuery = `DELETE FROM JAC_notes WHERE username = ?`;
+    db.query(deleteStudentQuery, [studentUsername], (error, results, fields) => {
+      if (error) {
+        console.error('Error deleting existing student notes:', error);
+        return res.status(500).send('Failed to delete existing student notes');
+      }
+
+      const studentValues = studentNotes.map(note => [studentUsername, note]);
+      const insertStudentQuery = 'INSERT INTO JAC_notes (username, note) VALUES ?';
+      db.query(insertStudentQuery, [studentValues], (error, results) => {
+        if (error) {
+          console.error('Error saving student notes:', error);
+          return res.status(500).send('Failed to save student notes');
+        }
+        console.log('Student notes saved successfully');
+        res.sendStatus(200);
+      });
+    });
+  } else {
+    const user = decoded.user;
+    const query = 'INSERT INTO JAC_notes (username, note) VALUES ?';
+    const values = notes.map(note => [user, note]);
+
+    const deleteQuery = `DELETE FROM JAC_notes WHERE username = ?`;
+    db.query(deleteQuery, [user], (error, results, fields) => {
+      if (error) {
+        console.error('Error deleting existing notes:', error);
+        return res.status(500).send('Failed to delete existing notes');
+      }
+
+      db.query(query, [values], (error, results) => {
+        if (error) {
+          console.error('Error saving notes:', error);
+          return res.status(500).send('Failed to save notes');
         }
         console.log('Notes saved successfully');
         res.sendStatus(200);
+      });
     });
-  });
+  }
 });

@@ -25,16 +25,24 @@ addBtn.addEventListener("click", function (e) {
   let addTxt = document.getElementById("addTxt");
   let notes = localStorage.getItem("notes");
   if (notes == null) {
-    notesObj = [];
+    notesObj = { notes: [] };
   } else {
     notesObj = JSON.parse(notes);
   }
-  notesObj.push(addTxt.value);
+
+  if (userIsFaculty()) {
+    if (!notesObj.facultyNotes) {
+      notesObj.facultyNotes = [];
+    }
+    notesObj.facultyNotes.push(addTxt.value);
+  } else {
+    notesObj.notes.push(addTxt.value);
+  }
+
   localStorage.setItem("notes", JSON.stringify(notesObj));
   addTxt.value = "";
   showNotes();
 });
-
 
 function showNotes() {
   let notes = localStorage.getItem("notes");
@@ -45,16 +53,42 @@ function showNotes() {
   }
 
   let html = "";
-  notesObj.forEach(function(element, index) {
-    html += `
-      <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
-        <div class="card-body">
-          <h5 class="card-title">Note ${index + 1}</h5>
-          <p class="card-text">${element}</p>
-          <button class="btn btn-primary" onclick="deleteNote(${index})">Delete Note</button>
-        </div>
-      </div>`;
-  });
+  
+  if (userIsFaculty()) {
+    html += `<h3>Faculty Notes:</h3>`;
+    notesObj.facultyNotes.forEach(function(element, index) {
+      html += `
+        <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Note ${index + 1}</h5>
+            <p class="card-text">${element}</p>
+            <button class="btn btn-primary" onclick="deleteNote(${index})">Delete Note</button>
+          </div>
+        </div>`;
+    });
+    
+    html += `<h3>Student Notes:</h3>`;
+    notesObj.studentNotes.forEach(function(element, index) {
+      html += `
+        <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Note ${index + 1}</h5>
+            <p class="card-text">${element}</p>
+          </div>
+        </div>`;
+    });
+  } else {
+    notesObj.forEach(function(element, index) {
+      html += `
+        <div class="noteCard my-2 mx-2 card" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">Note ${index + 1}</h5>
+            <p class="card-text">${element}</p>
+            <button class="btn btn-primary" onclick="deleteNote(${index})">Delete Note</button>
+          </div>
+        </div>`;
+    });
+  }
 
   let notesElm = document.getElementById("notes");
   if (notesObj.length != 0) {
@@ -68,17 +102,25 @@ function showNotes() {
 function deleteNote(index) {
   let notes = localStorage.getItem("notes");
   if (notes == null) {
-    notesObj = [];
+    notesObj = { notes: [] };
   } else {
     notesObj = JSON.parse(notes);
   }
 
-  notesObj.splice(index, 1);
+  if (userIsFaculty()) {
+    if (notesObj.facultyNotes) {
+      notesObj.facultyNotes.splice(index, 1);
+    }
+  } else {
+      notesObj.splice(index, 1);
+  }
 
   localStorage.setItem("notes", JSON.stringify(notesObj));
 
   showNotes();
 }
+
+
 
 function getNotes() {
   $.ajax({
@@ -87,9 +129,25 @@ function getNotes() {
     data: {username: urlParameters.get('username')},
     headers: {"Authorization": localStorage.getItem('token')},
     dataType:"json"
-}).done(function(notesData) {
-  localStorage.setItem("notes", JSON.stringify(notesData.notes));
-  showNotes();
-});
+  }).done(function(notesData) {
+    if (userIsFaculty()) {
+      localStorage.setItem("notes", JSON.stringify({
+        facultyNotes: notesData.facultyNotes,
+        studentNotes: notesData.studentNotes
+      }));
+    } else {
+      localStorage.setItem("notes", JSON.stringify(notesData.notes));
+    }
+    showNotes();
+  });
+}
 
+function userIsFaculty() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    const tokenData = atob(token.split('.')[1]);
+    const data = JSON.parse(tokenData);
+    return data.faculty.isFaculty;
+  }
+  return false;
 }
