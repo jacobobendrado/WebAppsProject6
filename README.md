@@ -21,8 +21,10 @@ Once both servers are up, navigate to **http://localhost:5173**
 
 ### Students
 asteele: password
+
 ceppich: password
 
 ### Faculty
 hammon: password
+
 gallagher: password
