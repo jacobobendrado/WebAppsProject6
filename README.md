@@ -1,8 +1,8 @@
-#Web Apps Project 6
+# Web Apps Project 6
 
 Alex Steele, Jacob Bender, Christian Eppich
 
-##Installation Instructions
+## Installation Instructions
 
 First, clone this repository from GitHub.
   Make sure that `git` is installed and able to be used from the command line.
@@ -17,12 +17,12 @@ Next, have a second terminal in the `/server` directory and run `npm start`
 
 Once both servers are up, navigate to **http://localhost:5173**
 
-##Test Users and Passwords
+## Test Users and Passwords
 
-###Students
+### Students
 asteele: password
 ceppich: password
 
-###Faculty
+### Faculty
 hammon: password
 gallagher: password
