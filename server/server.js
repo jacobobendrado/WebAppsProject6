@@ -140,7 +140,7 @@ app.get('/user', (req, res) => {
   db.query('SELECT name, catalog_year, default_plan FROM JAC_users WHERE username = ?', [user], (error, results) => {
     if (error) {
       console.error('Error fetching user data:', error);
-      return res.status(500).send('Internal Server Error 1');
+      return res.status(500).send('Internal Server Error');
     }
 
     if (results.length === 0) {
@@ -152,7 +152,7 @@ app.get('/user', (req, res) => {
     db.query('SELECT course_id, grade FROM JAC_taken_courses WHERE username = ?', [user], (error, courses) => {
       if (error) {
         console.error('Error fetching courses:', error);
-        return res.status(500).send('Internal Server Error 2');
+        return res.status(500).send('Internal Server Error');
       }
 
       let gradePoints = 0.0;
@@ -174,7 +174,7 @@ app.get('/user', (req, res) => {
         db.query(query, [courseIds], (error, creditRows) => {
             if (error) {
             console.error('Error fetching credits:', error);
-            return res.status(500).send('Internal Server Error 3');
+            return res.status(500).send('Internal Server Error');
             }
         
             const creditMap = new Map();
@@ -186,7 +186,7 @@ app.get('/user', (req, res) => {
             const credits = creditMap.get(course.course_id);
             if (!credits) {
                 console.error('Credits not found for course:', course.course_id);
-                return res.status(500).send('Internal Server Error 4');
+                return res.status(500).send('Internal Server Error');
             }
         
             totalCredits += credits;
@@ -229,7 +229,7 @@ app.get('/user', (req, res) => {
                 break;
                 default:
                 console.error('Invalid grade:', course.grade);
-                return res.status(500).send('Internal Server Error 5');
+                return res.status(500).send('Internal Server Error');
             }
             });
 
@@ -458,7 +458,6 @@ app.post('/save-planned-courses', (req, res) => {
         console.error('Error deleting existing planned courses:', error);
         return;
     }
-    console.log(plannedCourses);
     for (let course_id in plannedCourses) {
       let course = plannedCourses[course_id];
       let query = `INSERT INTO JAC_planned_courses (plan_name, username, course_id, plan_year, term) VALUES (?, ?, ?, ?, ?)`;
@@ -468,8 +467,6 @@ app.post('/save-planned-courses', (req, res) => {
       db.query(query, values, (error, results, fields) => {
           if (error) {
               console.error('Error saving course:', error);
-          } else {
-              console.log('Course saved successfully:', course_id);
           }
       });
     }
@@ -596,7 +593,6 @@ app.post('/save-notes', (req, res) => {
           console.error('Error saving faculty notes:', error);
           return res.status(500).send('Failed to save faculty notes');
         }
-        console.log('Faculty notes saved successfully');
       });
     });
 
@@ -614,7 +610,6 @@ app.post('/save-notes', (req, res) => {
           console.error('Error saving student notes:', error);
           return res.status(500).send('Failed to save student notes');
         }
-        console.log('Student notes saved successfully');
         res.sendStatus(200);
       });
     });
@@ -635,7 +630,6 @@ app.post('/save-notes', (req, res) => {
           console.error('Error saving notes:', error);
           return res.status(500).send('Failed to save notes');
         }
-        console.log('Notes saved successfully');
         res.sendStatus(200);
       });
     });

@@ -7,7 +7,6 @@ var plansspan = document.getElementById("close-plans-modal");
 plansbtn.onclick = function() {
   plansmodal.style.display = "block";
   getPlans();
-  console.log("what up we out here in plansbnt boi");
 }
 
 plansspan.onclick = function() {

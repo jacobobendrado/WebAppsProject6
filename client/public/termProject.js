@@ -151,7 +151,6 @@ let loadData = function() {
     $.ajax({ url: "http://localhost:8081/user", method: "GET", data: planInfo, headers: {"Authorization": localStorage.getItem('token')},dataType: "json"}).done(function(userData) {
         if (!planInfo.planId) {
             planInfo.planId = userData.default_plan;
-            console.log(planInfo.planId);
         }
         $.ajax({url: "http://localhost:8081/plan", method: "GET", data: planInfo, headers: {"Authorization": localStorage.getItem('token')}, dataType: "json"}).done(function(planData) {
             myPlan = new Plan(planData.plan_name, planData.catalog_year, planData.majors, planData.minors, userData.name, planData.currYear, planData.currTerm);
@@ -373,8 +372,6 @@ function removeClass(box) {
         rmButton.addEventListener('click', function(e) {
             const class_accordian = document.querySelector("#" + rmButton.id);
             const class_table = document.querySelector("#table-" + rmButton.id);
-            console.log(class_accordian);
-            console.log(class_table);
             courses[rmButton.id].term = null;
             courses[rmButton.id].year = null;
             class_accordian.classList.add('draggable');
@@ -396,15 +393,12 @@ function removeClass(box) {
             schedule.years.forEach(function(currYear) {
                 if (currYear.fall.courses.indexOf(rmCourse) > -1) {
                     currYear.fall.removeCourse(currYear.fall.courses.indexOf(rmCourse));
-                    console.log(rmCourse);
                 }
                 if (currYear.spring.courses.indexOf(rmCourse) > -1) {
                     currYear.spring.removeCourse(currYear.spring.courses.indexOf(rmCourse));
-                    console.log(rmCourse);
                 }
                 if (currYear.summer.courses.indexOf(rmCourse) > -1) {
                     currYear.summer.removeCourse(currYear.summer.courses.indexOf(rmCourse));
-                    console.log(rmCourse);
                 }
                 
             })
@@ -419,7 +413,6 @@ function handleDragStart(e) {
 }
 function setupDragAndDrop() {
     const boxes = document.querySelectorAll(".sub-box");
-    console.log(boxes);
     const draggable_data_accoridan = document.querySelectorAll(".accoridan-data.draggable");
     const draggable_data_table = document.querySelectorAll(".table-data.draggable");
     for (let elem of draggable_data_accoridan) {
@@ -443,7 +436,6 @@ function setupDragAndDrop() {
                 let selected = '';
                 let fromTable = false;
 
-                console.log(selectedId);
                 selected = document.getElementById(selectedId);
 
                 let courseId = '';
@@ -538,17 +530,14 @@ function setupDragAndDrop() {
 }
 
 function updateHours(box, inOrOut, credHour = 0){
-    console.log(box);
     let termYearText = box.querySelector('h5').textContent.trim();
     let [termUser, year] = termYearText.split(' ');
     termUser = termUser.toLowerCase();
     let initHours = 0;
     if(termUser == 'fall'){
-        console.log(schedule.years[year - schedule.firstYear][termUser]);
         initHours = schedule.years[year - schedule.firstYear][termUser].hours - credHour;
     }
     else{
-        console.log(schedule.years[year - schedule.firstYear - 1][termUser]);
         initHours = schedule.years[year - schedule.firstYear - 1][termUser].hours - credHour;
     }
 
@@ -558,7 +547,6 @@ function updateHours(box, inOrOut, credHour = 0){
     let hoursElement = document.getElementById('hours' + termUser + year);
 
     let coursesPresent = box.querySelectorAll('.planned-course').length > 0;
-    console.log(box.querySelectorAll('.planned-course'));
     if (coursesPresent == false && inOrOut == 'out' && hoursElement) {
         hoursElement.remove();
         exit;
